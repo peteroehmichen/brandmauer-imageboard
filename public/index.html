@@ -1,10 +1,30 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-    <title></title>
-</head>
-<body>
-    <script src="/js/vue.js"></script>
-    <script src="/js/axios.min.js"></script>
-</body>
+    <head>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <title>My Imageboard</title>
+    </head>
+    <body>
+        <header>
+            <h1>My Imageboard</h1>
+        </header>
+        <main>
+            <div id="main">
+                <h2>{{sectionName}}</h2>
+                <div class="imageGrid">
+                    <div class="card" v-for="each in images">
+                        <div class="thumb">
+                            <img :src="each.url" :alt="each.title" />
+                        </div>
+                        <p>{{each.title}}</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer>Made with 🤘 in Berlin by Peter Oehmichen, 2021</footer>
+
+        <script src="/js/vue.js"></script>
+        <script src="/js/axios.min.js"></script>
+        <script src="/js/script.js"></script>
+    </body>
 </html>
