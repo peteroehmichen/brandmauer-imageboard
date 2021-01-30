@@ -4,25 +4,10 @@ const db = require("./db.js");
 
 app.use(express.static("public"));
 
-app.use((req, res, next) => {
-    db.getAllImages();
-    next();
-});
-
-let cities = [
-    {
-        name: "Berlin",
-        country: "Germany",
-    },
-    {
-        name: "Rome",
-        country: "Italy",
-    },
-    {
-        name: "London",
-        country: "UK",
-    },
-];
+// app.use((req, res, next) => {
+//     db.getAllImages();
+//     next();
+// });
 
 app.get("/images", (req, res) => {
     db.getAllImages().then((images) => res.json(images));

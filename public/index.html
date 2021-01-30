@@ -14,14 +14,17 @@
                 <div class="imageGrid">
                     <div class="card" v-for="each in images">
                         <div class="thumb">
-                            <img :src="each.url" :alt="each.title" />
+                            <img
+                                v-bind:src="each.url"
+                                v-bind:alt="each.title"
+                            />
                         </div>
                         <p>{{each.title}}</p>
                     </div>
                 </div>
             </div>
         </main>
-        <footer>Made with 🤘 in Berlin by Peter Oehmichen, 2021</footer>
+        <footer>Made with 🤘 by Peter Oehmichen, Berlin 2021</footer>
 
         <script src="/js/vue.js"></script>
         <script src="/js/axios.min.js"></script>

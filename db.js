@@ -8,11 +8,7 @@ module.exports.getAllImages = function () {
     return sql
         .query("SELECT * FROM images;")
         .then((result) => {
-            const images = [];
-            result.rows.forEach((img) => {
-                images.push(img);
-            });
-            return images;
+            return result.rows;
         })
         .catch((err) => {
             console.log("Error fetching Images:", err);
