@@ -6,12 +6,19 @@ const sql = spicedPg(
 
 module.exports.getAllImages = function () {
     return sql
-        .query("SELECT * FROM images;")
-        .then((result) => {
-            return result.rows;
-        })
+        .query("SELECT * FROM images ORDER BY created_at DESC;")
+        .then((result) => result.rows)
         .catch((err) => {
             console.log("Error fetching Images:", err);
             return [];
         });
 }; // maybe I want to reduce the number of infos for this requests later...
+
+module.exports.addNewImage = function (url, username, title, description) {
+    const params = [url, username, title, description];
+    const q = `INSERT INTO images (url, username, title, description) VALUES ($1, $2, $3, $4);`;
+    return sql
+        .query(q, params)
+        .then((result) => result)
+        .catch((err) => err);
+};
