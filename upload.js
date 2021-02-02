@@ -54,7 +54,7 @@ exports.uploadToAWS = (req, res, next) => {
         promise
             .then(() => {
                 // it worked!!!
-                console.log("AWS Upload successful");
+                // console.log("AWS Upload successful");
                 fs.unlink(path, () => {});
                 req.body.url = s3Url + req.file.filename;
                 next();

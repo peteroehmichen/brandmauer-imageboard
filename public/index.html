@@ -37,8 +37,16 @@
                             @change="fileSelect"
                             type="file"
                             name="file"
+                            id="file"
                             accept="image/*"
                         />
+
+                        <label for="file">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/OOjs_UI_icon_upload.svg">
+                            <span>{{filename}}</span>
+                        </label>
+
+                       
                         <button
                             @click.prevent="uploadHandler"
                             v-bind:disabled="locked"
@@ -46,11 +54,10 @@
                             upload
                         </button>
                     </form>
-                    <div class="msg">{{msg}}</div>
                 </div>
                 <h2>{{sectionName}}</h2>
                 <div class="imageGrid">
-                    <div class="card" v-for="each in images">
+                    <div class="card" v-for="each in images" @click="openModal(each.id)">
                         <div class="thumb">
                             <img
                                 v-bind:src="each.url"
@@ -60,9 +67,39 @@
                         <p>{{each.title}}</p>
                     </div>
                 </div>
+                <modal-component v-if="modalId" :imageid="modalId" @close-modal="closeModal"></modal-componentv>
             </div>
         </main>
         <footer>Made with 🤘 by Peter Oehmichen, Berlin 2021</footer>
+
+        <script id="modal-template" type="text/x-template">
+            <div class="overlay">
+                <div class="imageModal">
+                    <div class="modNav">
+                        <p class="modNavElements" @click="closeModal">◀ 𝗫 ▶</p>
+                    </div>
+                    <div class="modMain">
+                        <div class="modLeft">
+                            <div class="imageTitle">
+                                <h2>"{{image.title}}"</h2>
+                            </div>
+                            <div class="imagePic">
+                                <img :src="image.url" :alt="image.title">
+                                <div class="subtitle">
+                                    <p>posted {{image.created_at}} by {{image.username}} </p>
+                                </div>
+                            </div>
+                            <div class="imageDescription">
+                                <p>Description: {{image.description}}</p>
+                            </div>
+                        </div>
+                        <div class="modRight">
+                            <h3>Comments</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </script>
 
         <script src="/js/vue.js"></script>
         <script src="/js/axios.min.js"></script>
