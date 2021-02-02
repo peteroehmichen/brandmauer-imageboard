@@ -8,8 +8,8 @@
             username: "",
             description: "",
             title: "",
-            msg: "...",
-            locked: false,
+            msg: "",
+            locked: true,
             file: null,
         }, // data ends
         mounted: function () {
@@ -25,23 +25,47 @@
         },
         methods: {
             fileSelect: function (e) {
-                this.file = e.target.files[0];
                 // console.log(e.target.files[0].size);
                 if (e.target.files[0].size > 2097152) {
-                    this.locked = true;
                     this.msg = "selected file size too large (max. 2 MB)";
+                    this.file = null;
                 } else {
-                    this.msg = "...";
-                    this.locked = false;
+                    this.msg = "";
+                    this.file = e.target.files[0];
                 }
+                this.activateBtn();
             },
             checkFields: function (e) {
-                console.log(e);
-                console.dir(e);
                 if (e.target.value === "") {
-                    e.target.style.borderBottom = "5px solid red";
+                    e.target.style.borderBottom = "3px solid orangered";
+                    // e.target.removeClass("ok");
+                    // this.msg = "Field cannot be empty";
                 } else {
-                    e.target.style.borderBottom = "5px solid green";
+                    var regex = /[&<>;]/;
+                    // console.log(regex.test(e.target.value));
+                    if (regex.test(e.target.value)) {
+                        console.log("fire!");
+                        e.target.style.borderBottom = "3px solid orangered";
+                        this.msg = "text cannot include special characters";
+                    } else {
+                        this.msg = "";
+                        e.target.style.borderBottom = "3px solid green";
+                    }
+                    // e.target.addClass("ok");
+                    // this.msg = "";
+                }
+                this.activateBtn();
+            },
+            activateBtn: function () {
+                if (
+                    this.title != "" &&
+                    this.description != "" &&
+                    this.username != "" &&
+                    this.file
+                ) {
+                    this.locked = false;
+                } else {
+                    this.locked = true;
                 }
             },
             uploadHandler: function () {
@@ -65,7 +89,6 @@
                         // console.log("result from axios.post:", result);
                         // console.log("this inside axios.post:", self);
                         self.images.unshift(result.data);
-                        self.locked = false;
                     })
                     .catch(function (err) {
                         console.log("ERR in axios.post:", err);
