@@ -1,14 +1,39 @@
 (function () {
+    function format_time(created) {
+        let timePassed = Date.now() - new Date(created);
+        let minutes = timePassed / (1000 * 60);
+        let hours = minutes / 60;
+        if (hours >= 48) {
+            timePassed = Math.floor(hours / 24);
+            timePassed = timePassed + " days ago";
+        } else if (hours > 24) {
+            timePassed = Math.floor(hours - 24);
+            timePassed = `1 day ago`;
+        } else if (hours >= 1) {
+            // more than 1 hour
+            timePassed = Math.floor(hours);
+            timePassed = timePassed + " hour/s ago";
+        } else {
+            if (minutes > 1) {
+                timePassed = Math.floor(minutes) + " minute/s ago";
+            } else {
+                timePassed = "less than 1 minute ago";
+            }
+        }
+        return timePassed;
+    }
+
     Vue.component("comment-component", {
         template: "#comment-template",
-        props: [],
+        props: ["image"],
         mounted: function () {
             // console.log("reading comments now...");
             var self = this;
             axios
-                .get(`/comments/${5}`)
+                .get(`/comments/${this.image}`)
                 .then(function (details) {
                     // console.log("we received the following comments:", details);
+                    self.comments = details.data;
                 })
                 .catch(function (err) {
                     console.log(
@@ -21,21 +46,61 @@
             return {
                 comment: "",
                 username: "",
+                comments: [],
+                locked: true,
             };
         },
         methods: {
+            format_time: format_time,
+            checkFields: function (e) {
+                if (e.target.value === "") {
+                    e.target.style.borderBottom = "3px solid orangered";
+                } else {
+                    var regex = /[&<>;]/;
+                    if (regex.test(e.target.value)) {
+                        e.target.style.borderBottom = "3px solid orangered";
+                    } else {
+                        e.target.style.borderBottom = "3px solid green";
+                    }
+                }
+                this.activateBtn();
+            },
+            activateBtn: function () {
+                if (this.comment != "" && this.username != "") {
+                    this.locked = false;
+                } else {
+                    this.locked = true;
+                }
+
+                // if (
+                //     this.comment != "" &&
+                //     this.username != "" &&
+                //     // need to include the regex
+                // ) {
+                //     this.locked = false;
+                // } else {
+                //     this.locked = true;
+                // }
+            },
             writeComment: function () {
                 var self = this;
                 var commentObj = {
                     comment: this.comment,
                     username: this.username,
+                    imageId: this.image,
                 };
-                console.log("writing comment now with:", commentObj);
-                axios.post("/comment", commentObj).then(function (result) {
-                    console.log("return value after writing comment:", result);
-                }).catch(function (err) {
-                    
-                });
+                // console.log("writing comment now with:", commentObj);
+                axios
+                    .post("/comment", commentObj)
+                    .then(function (result) {
+                        commentObj.id = result.data.id;
+                        commentObj.created_at = result.data.created_at;
+                        self.comments.push(commentObj);
+                        self.comment = "";
+                        self.username = "";
+                        // console.log(formattime(result.data.created_at));
+                    })
+                    .catch(function (err) {});
                 // axios.post("/comment", commentObj).then(function (result) {
                 //     console.log("received obj after wirting comment:", result);
                 // }.catch(function (err) {
@@ -67,29 +132,30 @@
                 .then(function (details) {
                     // console.log("Picture details from SQL:", details.data);
                     self.image = details.data;
-                    let time = Date.now() - new Date(self.image.created_at);
-                    let hours = time / (1000 * 60 * 60);
-                    if (hours >= 48) {
-                        // 2 days or more
-                        time = Math.floor(hours / 24);
-                        time = time + " days ago";
-                    } else if (hours >= 24) {
-                        time = Math.floor(hours - 24);
-                        time = `1 day and ${time} hour(s) ago`;
-                    } else if (hours >= 1) {
-                        // more than 1 hour
-                        time = Math.floor(hours);
-                        time = time + " hours ago";
-                    } else {
-                        time = "less than 1 hour ago";
-                    }
-                    self.image.created_at = time;
+                    // let time = Date.now() - new Date(self.image.created_at);
+                    // let hours = time / (1000 * 60 * 60);
+                    // if (hours >= 48) {
+                    //     // 2 days or more
+                    //     time = Math.floor(hours / 24);
+                    //     time = time + " days ago";
+                    // } else if (hours >= 24) {
+                    //     time = Math.floor(hours - 24);
+                    //     time = `1 day and ${time} hour(s) ago`;
+                    // } else if (hours >= 1) {
+                    //     // more than 1 hour
+                    //     time = Math.floor(hours);
+                    //     time = time + " hours ago";
+                    // } else {
+                    //     time = "less than 1 hour ago";
+                    // }
+                    // self.image.created_at = time;
                 })
                 .catch(function (err) {
                     console.log("Error in getting image details:", err);
                 });
         },
         methods: {
+            format_time: format_time,
             closeModal: function () {
                 this.$emit("close-modal");
             },

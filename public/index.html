@@ -96,7 +96,7 @@
                             <div class="imagePic">
                                 <img :src="image.url" :alt="image.title">
                                 <div class="subtitle">
-                                    <p>posted {{image.created_at}} by {{image.username}} </p>
+                                    <p>posted {{format_time(image.created_at)}} by {{image.username}} </p>
                                 </div>
                             </div>
                             <div class="imageDescription">
@@ -104,7 +104,7 @@
                             </div>
                         </div>
                         <div class="modRight">
-                            <comment-component></comment-component>
+                            <comment-component :image="imageid"></comment-component>
                         </div>
                     </div>
                 </div>
@@ -120,22 +120,32 @@
                             type="text"
                             name="comment"
                             placeholder="Your Comment"
+                            v-on:input="checkFields"
                         />
                         <input
                             v-model="username"
                             type="text"
                             name="username"
                             placeholder="Your username"
+                            v-on:input="checkFields"
                         />
                         <button
                             @click.prevent="writeComment"
+                            v-bind:disabled="locked"
                         >
                             send Comment
                         </button>
                     </form>
                 </div>
                 <div class="showComments">
-                    see comments here
+                    <div class="comment" v-for="each in comments">
+                        <div class="userdata">
+                            <p>by {{each.username}} ({{format_time(each.created_at)}})</p>
+                        </div>
+                        <div class="commentText">
+                            <p>{{each.comment}}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </script>

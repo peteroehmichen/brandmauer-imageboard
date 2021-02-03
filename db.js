@@ -49,11 +49,11 @@ module.exports.getComments = function (imageId) {
 };
 
 module.exports.addComment = function (imageId, username, comment) {
-    console.log("writing comment");
+    // console.log("writing comment");
     const params = [imageId, username, comment];
     const q = `INSERT INTO comments (image_id, username, comment) VALUES ($1, $2, $3) RETURNING id, created_at;`;
     return sql
         .query(q, params)
-        .then((result) => result)
+        .then((result) => result.rows)
         .catch((err) => err);
 };

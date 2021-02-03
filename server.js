@@ -4,7 +4,7 @@ const db = require("./db.js");
 const { uploader, uploadToAWS } = require("./upload.js");
 
 app.use(express.static("public"));
-app.use("/comment", express.urlencoded({ extended: false }));
+app.use("/comment", express.json());
 
 app.get("/images/:start", (req, res) => {
     db.getImages(req.params.start)
@@ -45,13 +45,21 @@ app.get("/details/:id", (req, res) => {
 
 app.get("/comments/:imageId", (req, res) => {
     db.getComments(req.params.imageId).then((result) => {
+        // console.log("comments for picture", req.params.imageId);
         res.json(result.rows);
     });
 });
 
 app.post("/comment", (req, res) => {
-    console.log("post-object:", req.body);
-    res.json("comment probably written");
+    // console.log("post-object:", req.body);
+    db.addComment(req.body.imageId, req.body.username, req.body.comment).then(
+        (result) => {
+            // console.log(("SQLCommentWritten:", result));
+            req.body.id = result[0].id;
+            req.body.created_at = result[0].created_at;
+            res.json(req.body);
+        }
+    );
 });
 
 app.listen(8080, () => {
@@ -61,6 +69,6 @@ app.listen(8080, () => {
 /*
 to do: 
 good error messages for 
-    file to large
-    
+user input serverSide sterilisieren
+protect against 
 */

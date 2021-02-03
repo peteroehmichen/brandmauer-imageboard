@@ -12,7 +12,7 @@ body {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 100px auto 40px;
-    height: 100vh;
+    max-height: 100vh;
     padding: 20px 20px 0 20px;
     /* overflow: hidden; */
 }
@@ -26,11 +26,13 @@ header {
 main {
     position: relative;
     padding: 10px 0;
-    /* margin-bottom: 40px; */
+    overflow: scroll;
+    height: 90vh;
 }
 
 #main {
     position: relative;
+    /* height: 100%; */
 }
 
 .upload {
@@ -178,6 +180,7 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
+
 }
 
 .imageModal {
