@@ -1,4 +1,50 @@
 (function () {
+    Vue.component("comment-component", {
+        template: "#comment-template",
+        props: [],
+        mounted: function () {
+            // console.log("reading comments now...");
+            var self = this;
+            axios
+                .get(`/comments/${5}`)
+                .then(function (details) {
+                    // console.log("we received the following comments:", details);
+                })
+                .catch(function (err) {
+                    console.log(
+                        "There was an error while fetching comments:",
+                        err
+                    );
+                });
+        },
+        data: function () {
+            return {
+                comment: "",
+                username: "",
+            };
+        },
+        methods: {
+            writeComment: function () {
+                var self = this;
+                var commentObj = {
+                    comment: this.comment,
+                    username: this.username,
+                };
+                console.log("writing comment now with:", commentObj);
+                axios.post("/comment", commentObj).then(function (result) {
+                    console.log("return value after writing comment:", result);
+                }).catch(function (err) {
+                    
+                });
+                // axios.post("/comment", commentObj).then(function (result) {
+                //     console.log("received obj after wirting comment:", result);
+                // }.catch(function (err) {
+                //     console.log("error in return obj after writing comment:", err);
+                // });
+            },
+        },
+    });
+
     Vue.component("modal-component", {
         data: function () {
             return {
@@ -15,12 +61,13 @@
         template: "#modal-template",
         props: ["imageid"],
         mounted: function () {
+            var self = this;
             axios
                 .get(`/details/${this.imageid}`)
-                .then((details) => {
+                .then(function (details) {
                     // console.log("Picture details from SQL:", details.data);
-                    this.image = details.data;
-                    let time = Date.now() - new Date(this.image.created_at);
+                    self.image = details.data;
+                    let time = Date.now() - new Date(self.image.created_at);
                     let hours = time / (1000 * 60 * 60);
                     if (hours >= 48) {
                         // 2 days or more
@@ -36,16 +83,21 @@
                     } else {
                         time = "less than 1 hour ago";
                     }
-                    this.image.created_at = time;
+                    self.image.created_at = time;
                 })
-                .catch((err) => {
+                .catch(function (err) {
                     console.log("Error in getting image details:", err);
                 });
         },
         methods: {
             closeModal: function () {
-                // console.log("requesting to close...");
                 this.$emit("close-modal");
+            },
+            leftModal: function () {
+                this.$emit("left-modal");
+            },
+            rightModal: function () {
+                this.$emit("right-modal");
             },
         },
     });
@@ -61,29 +113,40 @@
             // msg: "",
             filename: "Choose image",
             modalId: 0,
+            totalImages: 0,
+            lastDisplayedId: 0,
+            distanceToLastId: 0,
             locked: true,
             file: null,
         }, // data ends
         mounted: function () {
-            var self = this;
-            axios
-                .get("/images")
-                .then(function (res) {
-                    // console.log("start-array:", res.data);
-                    self.images = res.data;
-                })
-                .catch(function (err) {
-                    console.log("error in fetching images:", err);
-                });
+            this.loadImages();
         },
         methods: {
+            loadImages: function () {
+                var self = this;
+                axios
+                    .get(`/images/${self.lastDisplayedId}`)
+                    .then(function (res) {
+                        // console.log(res.data);
+                        self.images = self.images.concat(res.data);
+                        self.lastDisplayedId = res.data[res.data.length - 1].id;
+                        self.distanceToLastId =
+                            self.lastDisplayedId - res.data[0].lowest_id;
+                        self.totalImages = res.data[0].total;
+                    })
+                    .catch(function (err) {
+                        console.log("error in fetching images:", err);
+                    });
+            },
             fileSelect: function (e) {
                 // console.log(e.target.files[0].size);
                 if (e.target.files[0].size > 2097152) {
                     // this.msg = "selected file size too large (max. 2 MB)";
                     this.file = null;
                     this.filename = "max. 2 MB";
-                    e.target.labels[0].style.borderBottom = "3px solid orangered";
+                    e.target.labels[0].style.borderBottom =
+                        "3px solid orangered";
                 } else {
                     // this.msg = "";
                     this.file = e.target.files[0];
@@ -158,7 +221,45 @@
             },
             closeModal: function () {
                 // console.log("closing the modal now...");
+                // console.log(this.modalId);
                 this.modalId = 0;
+            },
+            leftModal: function () {
+                // console.log("closing the modal now...");
+                // console.log(this.modalId);
+                for (var i = 0; i < this.images.length; i++) {
+                    if (this.images[i].id == this.modalId) {
+                        // console.log("current picture is at position", i);
+                        if (i != this.images.length - 1) {
+                            this.modalId = 0;
+                            var self = this;
+
+                            setTimeout(function () {
+                                self.modalId = self.images[i + 1].id;
+                            }, 300);
+                        }
+                        break;
+                    }
+                }
+                // console.log(this.modalId);
+            },
+            rightModal: function () {
+                // console.log("closing the modal now...");
+                // console.log(this.modalId);
+                for (var i = 0; i < this.images.length; i++) {
+                    if (this.images[i].id == this.modalId) {
+                        // console.log("current picture is at position", i);
+                        if (i != 0) {
+                            this.modalId = 0;
+                            var self = this;
+                            setTimeout(function () {
+                                self.modalId = self.images[i - 1].id;
+                            }, 300);
+                        }
+                        break;
+                    }
+                }
+                // console.log(this.modalId);
             },
         },
     });
@@ -167,8 +268,7 @@
 /*
 form validation finish! double messages dont work
 Pflichtfelder
-disable button when loading
-disable button on other unfitting cases
+show sum of pictures (maybe with new ones...)
 
 show error message in specific cases
 

@@ -4,9 +4,10 @@ const db = require("./db.js");
 const { uploader, uploadToAWS } = require("./upload.js");
 
 app.use(express.static("public"));
+app.use("/comment", express.urlencoded({ extended: false }));
 
-app.get("/images", (req, res) => {
-    db.getAllImages()
+app.get("/images/:start", (req, res) => {
+    db.getImages(req.params.start)
         .then((images) => res.json(images))
         .catch(() => res.json({ err: "could not load pictures" }));
 });
@@ -18,7 +19,6 @@ app.post("/upload", uploader.single("file"), uploadToAWS, (req, res) => {
         req.body.title,
         req.body.description
     ).then((result) => {
-        // console.log("error DB:", result);
         if (result.rowCount) {
             // console.log("SQL-DB upload successful - returned:", result);
             req.body.id = result.rows[0].id;
@@ -31,10 +31,9 @@ app.post("/upload", uploader.single("file"), uploadToAWS, (req, res) => {
     });
 });
 
-app.get("/details/:id", (req, res)=>{
-    // console.log("Server received request for image with ID ", req.param);
+app.get("/details/:id", (req, res) => {
     // console.log("Server received request for image with ID", req.params.id);
-    db.getImageById(req.params.id).then((result)=>{
+    db.getImageById(req.params.id).then((result) => {
         if (result.rowCount) {
             // console.log("SQL-DB for details successful - returned:", result);
             res.json(result.rows[0]);
@@ -42,9 +41,17 @@ app.get("/details/:id", (req, res)=>{
             res.json({ err: "server denied picture for unkown reason." });
         }
     });
-    
+});
 
+app.get("/comments/:imageId", (req, res) => {
+    db.getComments(req.params.imageId).then((result) => {
+        res.json(result.rows);
+    });
+});
 
+app.post("/comment", (req, res) => {
+    console.log("post-object:", req.body);
+    res.json("comment probably written");
 });
 
 app.listen(8080, () => {

@@ -55,7 +55,7 @@
                         </button>
                     </form>
                 </div>
-                <h2>{{sectionName}}</h2>
+                <h2>{{sectionName}} ({{totalImages}} in total)</h2>
                 <div class="imageGrid">
                     <div class="card" v-for="each in images" @click="openModal(each.id)">
                         <div class="thumb">
@@ -66,8 +66,9 @@
                         </div>
                         <p>{{each.title}}</p>
                     </div>
+                    <button class="more" v-if="distanceToLastId" @click="loadImages">More</button>
                 </div>
-                <modal-component v-if="modalId" :imageid="modalId" @close-modal="closeModal"></modal-componentv>
+                <modal-component v-if="modalId" :imageid="modalId" @close-modal="closeModal" @left-modal="leftModal" @right-modal="rightModal"></modal-componentv>
             </div>
         </main>
         <footer>Made with 🤘 by Peter Oehmichen, Berlin 2021</footer>
@@ -76,7 +77,16 @@
             <div class="overlay">
                 <div class="imageModal">
                     <div class="modNav">
-                        <p class="modNavElements" @click="closeModal">◀ 𝗫 ▶</p>
+                        <div class="left">
+                            <p class="modNavElements" @click="leftModal">◀</p>
+
+                        </div>
+                        <div class="end">
+                            <p class="modNavElements" @click="closeModal">𝗫</p>
+                        </div>
+                        <div class="right">
+                            <p class="modNavElements" @click="rightModal">▶</p>
+                        </div>
                     </div>
                     <div class="modMain">
                         <div class="modLeft">
@@ -94,13 +104,41 @@
                             </div>
                         </div>
                         <div class="modRight">
-                            <h3>Comments</h3>
+                            <comment-component></comment-component>
                         </div>
                     </div>
                 </div>
             </div>
         </script>
 
+        <script id="comment-template" type="text/x-template">
+            <div class="comments">
+                <div class="addComment">
+                    <form>
+                        <input
+                            v-model="comment"
+                            type="text"
+                            name="comment"
+                            placeholder="Your Comment"
+                        />
+                        <input
+                            v-model="username"
+                            type="text"
+                            name="username"
+                            placeholder="Your username"
+                        />
+                        <button
+                            @click.prevent="writeComment"
+                        >
+                            send Comment
+                        </button>
+                    </form>
+                </div>
+                <div class="showComments">
+                    see comments here
+                </div>
+            </div>
+        </script>
         <script src="/js/vue.js"></script>
         <script src="/js/axios.min.js"></script>
         <script src="/js/script.js"></script>
