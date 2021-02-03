@@ -8,69 +8,69 @@
         <header>
             <h1>My Imageboard</h1>
         </header>
-        <main>
-            <div id="main">
-                <div class="upload">
-                    <form>
-                        <input
-                            v-model="title"
-                            type="text"
-                            name="title"
-                            placeholder="title"
-                            v-on:input="checkFields"
-                        />
-                        <input
-                            v-model="description"
-                            type="text"
-                            name="description"
-                            placeholder="description"
-                            v-on:input="checkFields"
-                        />
-                        <input
-                            v-model="username"
-                            type="text"
-                            name="username"
-                            placeholder="username"
-                            v-on:input="checkFields"
-                        />
-                        <input
-                            @change="fileSelect"
-                            type="file"
-                            name="file"
-                            id="file"
-                            accept="image/*"
-                        />
+        <div id="main" v-bind:class="{noscroll : modalId}">
+            <div class="upload">
+                <form>
+                    <input
+                        v-model="title"
+                        type="text"
+                        name="title"
+                        placeholder="title"
+                        v-on:input="checkFields"
+                    />
+                    <input
+                        v-model="description"
+                        type="text"
+                        name="description"
+                        placeholder="description"
+                        v-on:input="checkFields"
+                    />
+                    <input
+                        v-model="username"
+                        type="text"
+                        name="username"
+                        placeholder="username"
+                        v-on:input="checkFields"
+                    />
+                    <input
+                        @change="fileSelect"
+                        type="file"
+                        name="file"
+                        id="file"
+                        accept="image/*"
+                    />
 
-                        <label for="file">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/OOjs_UI_icon_upload.svg">
-                            <span>{{filename}}</span>
-                        </label>
+                    <label for="file">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/OOjs_UI_icon_upload.svg">
+                        <span>{{filename}}</span>
+                    </label>
 
-                       
-                        <button
-                            @click.prevent="uploadHandler"
-                            v-bind:disabled="locked"
-                        >
-                            upload
-                        </button>
-                    </form>
-                </div>
-                <h2>{{sectionName}} ({{totalImages}} in total)</h2>
-                <div class="imageGrid">
-                    <div class="card" v-for="each in images" @click="openModal(each.id)">
-                        <div class="thumb">
-                            <img
-                                v-bind:src="each.url"
-                                v-bind:alt="each.title"
-                            />
-                        </div>
-                        <p>{{each.title}}</p>
-                    </div>
-                    <button class="more" v-if="distanceToLastId" @click="loadImages">More</button>
-                </div>
-                <modal-component v-if="modalId" :imageid="modalId" @close-modal="closeModal" @left-modal="leftModal" @right-modal="rightModal"></modal-componentv>
+                   
+                    <button
+                        @click.prevent="uploadHandler"
+                        v-bind:disabled="locked"
+                    >
+                        upload
+                    </button>
+                </form>
             </div>
-        </main>
+            <div>
+                <h2>{{sectionName}} ({{totalImages}} in total)</h2>
+            </div>
+            <div class="imageGrid">
+                <div class="card" v-for="each in images" @click="openModal(each.id)">
+                    <div class="thumb">
+                        <img
+                            v-bind:src="each.url"
+                            v-bind:alt="each.title"
+                        />
+                    </div>
+                    <h4>{{each.title}}</h4>
+                </div>
+                <button class="more" v-if="distanceToLastId" @click="loadImages">More</button>
+            </div>
+            <modal-component v-if="modalId" :imageid="modalId" @close-modal="closeModal" @left-modal="leftModal" @right-modal="rightModal"></modal-componentv>
+        </div>
         <footer>Made with 🤘 by Peter Oehmichen, Berlin 2021</footer>
 
         <script id="modal-template" type="text/x-template">
