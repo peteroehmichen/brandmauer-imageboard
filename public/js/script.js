@@ -27,20 +27,7 @@
         template: "#comment-template",
         props: ["image"],
         mounted: function () {
-            // console.log("reading comments now...");
-            var self = this;
-            axios
-                .get(`/comments/${this.image}`)
-                .then(function (details) {
-                    // console.log("we received the following comments:", details);
-                    self.comments = details.data;
-                })
-                .catch(function (err) {
-                    console.log(
-                        "There was an error while fetching comments:",
-                        err
-                    );
-                });
+            this.loadComments();
         },
         data: function () {
             return {
@@ -50,7 +37,27 @@
                 locked: true,
             };
         },
+        watch: {
+            image: function () {
+                this.loadComments();
+            },
+        },
         methods: {
+            loadComments: function () {
+                var self = this;
+                axios
+                    .get(`/comments/${this.image}`)
+                    .then(function (details) {
+                        // console.log("we received the following comments:", details);
+                        self.comments = details.data;
+                    })
+                    .catch(function (err) {
+                        console.log(
+                            "There was an error while fetching comments:",
+                            err
+                        );
+                    });
+            },
             format_time: format_time,
             checkFields: function (e) {
                 if (e.target.value === "") {
@@ -71,16 +78,6 @@
                 } else {
                     this.locked = true;
                 }
-
-                // if (
-                //     this.comment != "" &&
-                //     this.username != "" &&
-                //     // need to include the regex
-                // ) {
-                //     this.locked = false;
-                // } else {
-                //     this.locked = true;
-                // }
             },
             writeComment: function () {
                 var self = this;
@@ -120,70 +117,70 @@
                     url: "",
                     username: "",
                     created_at: "",
+                    younger: "",
+                    older: ",",
                 },
             };
         },
         template: "#modal-template",
         props: ["imageid"],
         mounted: function () {
-            var self = this;
-            axios
-                .get(`/details/${this.imageid}`)
-                .then(function (details) {
-                    // console.log("Picture details from SQL:", details.data);
-                    self.image = details.data;
-                    // let time = Date.now() - new Date(self.image.created_at);
-                    // let hours = time / (1000 * 60 * 60);
-                    // if (hours >= 48) {
-                    //     // 2 days or more
-                    //     time = Math.floor(hours / 24);
-                    //     time = time + " days ago";
-                    // } else if (hours >= 24) {
-                    //     time = Math.floor(hours - 24);
-                    //     time = `1 day and ${time} hour(s) ago`;
-                    // } else if (hours >= 1) {
-                    //     // more than 1 hour
-                    //     time = Math.floor(hours);
-                    //     time = time + " hours ago";
-                    // } else {
-                    //     time = "less than 1 hour ago";
-                    // }
-                    // self.image.created_at = time;
-                })
-                .catch(function (err) {
-                    console.log("Error in getting image details:", err);
-                });
+            this.loadModal();
+        },
+        watch: {
+            imageid: function () {
+                this.loadModal();
+            },
         },
         methods: {
             format_time: format_time,
+            loadModal: function () {
+                var self = this;
+                axios
+                    .get(`/details/${this.imageid}`)
+                    .then(function (details) {
+                        // console.log("SQL details for new modal:", details);
+                        if (details.data.err) {
+                            self.$emit("close-modal");
+                        } else {
+                            self.image = details.data;
+                        }
+                    })
+                    .catch(function (err) {
+                        console.log("Error in getting image details:", err);
+                        self.$emit("close-modal");
+                    });
+            },
             closeModal: function () {
                 this.$emit("close-modal");
             },
             leftModal: function () {
-                this.$emit("left-modal");
+                // this.$emit("left-modal");
+                if (this.image.older) {
+                    // this.imageid = this.image.older;
+                    window.location.hash = "#" + this.image.older;
+                    this.$emit("change-modal", this.image.older);
+                }
             },
             rightModal: function () {
-                this.$emit("right-modal");
+                if (this.image.younger) {
+                    // this.imageid = this.image.younger;
+                    window.location.hash = "#" + this.image.younger;
+                    this.$emit("change-modal", this.image.younger);
+                }
             },
             deleteImage: function () {
                 console.log("firing a delete req for", this.imageid);
-                var self = this;
-                axios
-                    .post("/delete", {id: this.imageid, url: this.image.url})
-                    .then(function (result) {
-                        console.log(
-                            "returned to client after deletion:",
-                            result
-                        );
-                    })
-                    .catch(function (err) {
-                        console.log(("Error after finished deletion:", err));
-                    });
+                this.$emit("remove-image", {
+                    id: this.imageid,
+                    url: this.image.url,
+                });
                 // this.$emit("close-modal");
             },
         },
     });
 
+    // handle unknown ID with hash-start
     new Vue({
         el: "#main", // reference to HTML container
         data: {
@@ -194,7 +191,7 @@
             title: "",
             // msg: "",
             filename: "Choose image",
-            modalId: 0,
+            modalId: window.location.hash.slice(1),
             totalImages: 0,
             lastDisplayedId: 0,
             distanceToLastId: 0,
@@ -202,7 +199,12 @@
             file: null,
         }, // data ends
         mounted: function () {
+            // console.log("hash:", window.location.hash.slice(1));
             this.loadImages();
+            var self = this;
+            addEventListener("hashchange", function () {
+                self.modalId = window.location.hash.slice(1);
+            });
         },
         methods: {
             loadImages: function () {
@@ -302,46 +304,30 @@
                 this.modalId = id;
             },
             closeModal: function () {
-                // console.log("closing the modal now...");
-                // console.log(this.modalId);
+                window.location.hash = "";
                 this.modalId = 0;
+                window.history.replaceState({}, "", "/");
             },
-            leftModal: function () {
-                // console.log("closing the modal now...");
-                // console.log(this.modalId);
-                for (var i = 0; i < this.images.length; i++) {
-                    if (this.images[i].id == this.modalId) {
-                        // console.log("current picture is at position", i);
-                        if (i != this.images.length - 1) {
-                            this.modalId = 0;
-                            var self = this;
-
-                            setTimeout(function () {
-                                self.modalId = self.images[i + 1].id;
-                            }, 300);
-                        }
-                        break;
-                    }
-                }
-                // console.log(this.modalId);
+            changeModal: function (newId) {
+                // console.log("received the new ID", newId);
+                this.modalId = newId;
             },
-            rightModal: function () {
-                // console.log("closing the modal now...");
-                // console.log(this.modalId);
-                for (var i = 0; i < this.images.length; i++) {
-                    if (this.images[i].id == this.modalId) {
-                        // console.log("current picture is at position", i);
-                        if (i != 0) {
-                            this.modalId = 0;
-                            var self = this;
-                            setTimeout(function () {
-                                self.modalId = self.images[i - 1].id;
-                            }, 300);
+            removeImage: function (obj) {
+                this.closeModal();
+                var self = this;
+                axios
+                    .post("/delete", obj)
+                    .then(function (result) {
+                        for (var i = 0; self.images.length; i++) {
+                            if (self.images[i].id == obj.id) {
+                                self.images.splice(i, 1);
+                                break;
+                            }
                         }
-                        break;
-                    }
-                }
-                // console.log(this.modalId);
+                    })
+                    .catch(function (err) {
+                        console.log(("Error after finished deletion:", err));
+                    });
             },
         },
     });

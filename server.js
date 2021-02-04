@@ -66,10 +66,10 @@ app.post("/comment", express.json(), (req, res) => {
 });
 
 app.post("/delete", express.json(), deleteFromAWS, (req, res) => {
-    console.log("DELETION Route hit");
-    console.log(req.body);
-    db.deleteImage(req.body.id);
-    res.json({ deletion: "ok" });
+    db.deleteImage(req.body.id).then((result)=>{
+        // console.log("SQL confirmation of Deletion:", result);
+        res.json(result);
+    });
 });
 
 app.listen(8080, () => {

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <!-- <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Wallpoet&display=swap" rel="stylesheet"> -->
         <link rel="stylesheet" href="/CSS/styles.css" />
         <title>My Imageboard</title>
     </head>
     <body>
         <header>
-            <h1>My Imageboard</h1>
+            <h1>Brandmauer</h1>
         </header>
         <div id="main" v-bind:class="{noscroll : modalId}">
             <div class="upload">
@@ -58,7 +60,7 @@
                 <h2>{{sectionName}} ({{totalImages}} in total)</h2>
             </div>
             <div class="imageGrid">
-                <div class="card" v-for="each in images" @click="openModal(each.id)">
+                <!-- <div class="card" v-for="each in images" @click="openModal(each.id)">
                     <div class="thumb">
                         <img
                             v-bind:src="each.url"
@@ -66,10 +68,21 @@
                         />
                     </div>
                     <h4>{{each.title}}</h4>
-                </div>
+                </div> -->
+                <a :href="'#' + each.id" v-for="each in images" >
+                    <div class="card">
+                        <div class="thumb">
+                            <img
+                                v-bind:src="each.url"
+                                v-bind:alt="each.title"
+                            />
+                        </div>
+                        <h4>{{each.title}}</h4>
+                    </div>
+                </a>
                 <button class="more" v-if="distanceToLastId" @click="loadImages">More</button>
             </div>
-            <modal-component v-if="modalId" :imageid="modalId" @close-modal="closeModal" @left-modal="leftModal" @right-modal="rightModal"></modal-componentv>
+            <modal-component v-if="modalId" :imageid="modalId" @remove-image="removeImage" @close-modal="closeModal" @change-modal="changeModal"></modal-componentv>
         </div>
         <footer>Made with 🤘 by Peter Oehmichen, Berlin 2021</footer>
 
@@ -78,14 +91,17 @@
                 <div class="imageModal">
                     <div class="modNav">
                         <div class="left">
-                            <p class="modNavElements" @click="leftModal">◀</p>
-
+                            <p v-if="image.older" class="modNavElements" @click="leftModal">◀</p>
+                            <p v-else class="modNavElements">◼︎</p>
+                            <!-- <button v-bind:disabled="image.older" @click.prevent="leftModal">older</button> -->
                         </div>
                         <div class="end">
                             <p class="modNavElements" @click="closeModal">𝗫</p>
                         </div>
                         <div class="right">
-                            <p class="modNavElements" @click="rightModal">▶</p>
+                            <p v-if="image.younger" class="modNavElements" @click="rightModal">▶</p>
+                            <p v-else class="modNavElements">◼︎</p>
+                            <!-- <button v-bind:disabled="image.younger" @click.prevent="rightModal">younger</button> -->
                         </div>
                     </div>
                     <div class="modMain">
@@ -147,6 +163,7 @@
                         <div class="commentText">
                             <p>{{each.comment}}</p>
                         </div>
+                        div.
                     </div>
                 </div>
             </div>

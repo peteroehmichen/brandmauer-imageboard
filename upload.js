@@ -37,7 +37,9 @@ module.exports.uploader = multer({
 
 exports.uploadToAWS = (req, res, next) => {
     if (!req.file) {
-        res.json({ err: "File does not match standards (max. 2MB, correct format, etc" });
+        res.json({
+            err: "File does not match standards (max. 2MB, correct format, etc",
+        });
     } else {
         const { filename, mimetype, size, path } = req.file;
         const promise = s3
@@ -68,18 +70,25 @@ exports.uploadToAWS = (req, res, next) => {
 
 exports.deleteFromAWS = (req, res, next) => {
     const filename = req.body.url.replace(s3Url, "");
-    console.log("AWS-deletion in progress for:", filename);
+    // console.log("File:", filename);
     const params = {
         Bucket: "oehmichen-imageboard",
         Key: filename,
     };
-    next();
+    s3.deleteObject(params)
+        .promise()
+        .then((result) => {
+            // console.log("deletion confirmation from AWS", result);
+            next();
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
 
-
-    // s3.deleteObject(params).promise().then((result)=>{
-    //     console.log("deletion response from AWS", result);
-    //     next();
-    // }).catch((err)=>{
-    //     console.log(err)
-    // })
-}
+/*
+Final steps to do:
+format delete button
+format comment inputs
+gather grafitti pictures
+*/
