@@ -65,3 +65,21 @@ exports.uploadToAWS = (req, res, next) => {
             });
     }
 };
+
+exports.deleteFromAWS = (req, res, next) => {
+    const filename = req.body.url.replace(s3Url, "");
+    console.log("AWS-deletion in progress for:", filename);
+    const params = {
+        Bucket: "oehmichen-imageboard",
+        Key: filename,
+    };
+    next();
+
+
+    // s3.deleteObject(params).promise().then((result)=>{
+    //     console.log("deletion response from AWS", result);
+    //     next();
+    // }).catch((err)=>{
+    //     console.log(err)
+    // })
+}

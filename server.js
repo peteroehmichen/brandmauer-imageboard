@@ -1,10 +1,12 @@
 const express = require("express");
 const app = express();
 const db = require("./db.js");
-const { uploader, uploadToAWS } = require("./upload.js");
+const { uploader, uploadToAWS, deleteFromAWS } = require("./upload.js");
 
 app.use(express.static("public"));
-app.use("/comment", express.json());
+// app.use("/comment", express.json());
+// app.use("/delete", express.json());
+// app.use("/delete", express.urlencoded({ extended: false }));
 
 app.get("/images/:start", (req, res) => {
     db.getImages(req.params.start)
@@ -50,7 +52,7 @@ app.get("/comments/:imageId", (req, res) => {
     });
 });
 
-app.post("/comment", (req, res) => {
+app.post("/comment", express.json(), (req, res) => {
     // console.log("post-object:", req.body);
     db.addComment(req.body.imageId, req.body.username, req.body.comment).then(
         (result) => {
@@ -58,8 +60,16 @@ app.post("/comment", (req, res) => {
             req.body.id = result[0].id;
             req.body.created_at = result[0].created_at;
             res.json(req.body);
+            // turn it around! first SQL and then AWS
         }
     );
+});
+
+app.post("/delete", express.json(), deleteFromAWS, (req, res) => {
+    console.log("DELETION Route hit");
+    console.log(req.body);
+    db.deleteImage(req.body.id);
+    res.json({ deletion: "ok" });
 });
 
 app.listen(8080, () => {

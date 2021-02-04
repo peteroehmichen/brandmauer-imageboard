@@ -43,7 +43,10 @@ module.exports.getImageById = function (id) {
 
 module.exports.getComments = function (imageId) {
     return sql
-        .query(`SELECT * FROM comments WHERE image_id=$1;`, [imageId])
+        .query(
+            `SELECT * FROM comments WHERE image_id=$1 ORDER BY created_at DESC;`,
+            [imageId]
+        )
         .then((result) => result)
         .catch((err) => err);
 };
@@ -56,4 +59,20 @@ module.exports.addComment = function (imageId, username, comment) {
         .query(q, params)
         .then((result) => result.rows)
         .catch((err) => err);
+};
+
+module.exports.deleteImage = function (imageId) {
+    console.log("running SQLDB deletion for", imageId);
+    return;
+    // return sql
+    //     .query(`DELETE FROM comments WHERE image_id=$1;`, [imageId])
+    //     .then((result) => {
+    //         console.log("Comment deleted: ", result);
+    //         return sql
+    //             .query(`DELETE FROM images WHERE id=$1;`)
+    //             .then((result) => {
+    //                 console.log("Image Deleted: ", result);
+    //             });
+    //     })
+    //     .catch((err) => err);
 };

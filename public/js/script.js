@@ -95,7 +95,7 @@
                     .then(function (result) {
                         commentObj.id = result.data.id;
                         commentObj.created_at = result.data.created_at;
-                        self.comments.push(commentObj);
+                        self.comments.unshift(commentObj);
                         self.comment = "";
                         self.username = "";
                         // console.log(formattime(result.data.created_at));
@@ -164,6 +164,22 @@
             },
             rightModal: function () {
                 this.$emit("right-modal");
+            },
+            deleteImage: function () {
+                console.log("firing a delete req for", this.imageid);
+                var self = this;
+                axios
+                    .post("/delete", {id: this.imageid, url: this.image.url})
+                    .then(function (result) {
+                        console.log(
+                            "returned to client after deletion:",
+                            result
+                        );
+                    })
+                    .catch(function (err) {
+                        console.log(("Error after finished deletion:", err));
+                    });
+                // this.$emit("close-modal");
             },
         },
     });
