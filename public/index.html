@@ -117,7 +117,7 @@
                             </div>
                             <div class="imageDescription">
                                 <p>Description: {{image.description}}</p>
-                                <p @click="deleteImage">delete!</p>
+                                <button @click.prevent="deleteImage">delete!</button>
 
                             </div>
                         </div>
@@ -132,6 +132,8 @@
         <script id="comment-template" type="text/x-template">
             <div class="comments">
                 <div class="addComment">
+                    <h4 v-if="replyId">Respond to {{replyName}}</h4>
+                    <h4 v-else>Post new Comment...</h4>
                     <form>
                         <input
                             v-model="comment"
@@ -156,14 +158,14 @@
                     </form>
                 </div>
                 <div class="showComments">
-                    <div class="comment" v-for="each in comments">
+                    <div v-for="each in comments" class="comment" v-bind:style="{ 'margin-left': each.indent }">
                         <div class="userdata">
                             <p>by {{each.username}} ({{format_time(each.created_at)}})</p>
                         </div>
                         <div class="commentText">
                             <p>{{each.comment}}</p>
                         </div>
-                        div.
+                        <div class="reply" @click="parentComment(each.username, each.id)" v-bind:id="(each.id === replyId)">↩</div>
                     </div>
                 </div>
             </div>
@@ -173,3 +175,4 @@
         <script src="/js/script.js"></script>
     </body>
 </html>
+<!-- v-bind:style="{ 'margin-left': each.indent }" -->

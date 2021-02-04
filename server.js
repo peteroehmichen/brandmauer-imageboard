@@ -53,8 +53,8 @@ app.get("/comments/:imageId", (req, res) => {
 });
 
 app.post("/comment", express.json(), (req, res) => {
-    // console.log("post-object:", req.body);
-    db.addComment(req.body.imageId, req.body.username, req.body.comment).then(
+    console.log("post-object:", req.body);
+    db.addComment(req.body.imageId, req.body.username, req.body.comment, req.body.response_to).then(
         (result) => {
             // console.log(("SQLCommentWritten:", result));
             req.body.id = result[0].id;

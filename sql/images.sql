@@ -15,6 +15,7 @@ CREATE TABLE comments(
     comment VARCHAR NOT NULL,
     username VARCHAR NOT NULL,
     image_id INT NOT NULL REFERENCES images(id),
+    response_to INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

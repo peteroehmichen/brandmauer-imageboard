@@ -35,6 +35,8 @@
                 username: "",
                 comments: [],
                 locked: true,
+                replyId: "",
+                replyName: "",
             };
         },
         watch: {
@@ -43,13 +45,81 @@
             },
         },
         methods: {
+            analyseComments: function (comments) {
+                // console.log("comments START:", comments);
+                var remain = [...comments];
+                var parents = [];
+                var i, j, k;
+                var temp = [];
+                var indent = 0;
+
+                // filtering root elements with empty response_to
+                for (i = 0; i < remain.length; i++) {
+                    if (remain[i].response_to < 1) {
+                        remain[i].indent = indent + "px";
+                        parents.push(remain[i]);
+                        remain.splice(i, 1);
+                        i--;
+                    } 
+                } 
+                console.log("after first run of Array size:", comments.length);
+                console.log("base elements:", parents.length);
+                console.log("sub elements:", remain.length);
+                // compare all parents and find the connected element and include after.
+                while (remain.length > 0) {
+                    indent += 15;
+                    for (i = 0; i < parents.length; i++) {
+                        k = i;
+                        for (j = 0; j < remain.length; j++) {
+                            if (parents[i].id == remain[j].response_to) {
+                                remain[j].indent = indent + "px";
+                                // parents.splice(i + 1, 0, remain[j]);
+                                temp.push(remain[j]);
+                                // parents.splice(k+1, 0, remain[j]);
+                                // k++;
+                                remain.splice(j, 1);
+                                j--;
+                            }
+                        }
+                    }
+                }
+                
+                // now I have all Elements on the current level, only responses left in comments
+                // next step is to find the element place each element after the parent
+                // I take the first parent and look in the remainings for the match on response. if so, then place element after parent
+
+                // while (comments.length > 0) {
+                //     console.log("length:", comments.length);
+                //     for (i = 0; i < parents.length; i++) {
+                //         for (j = 0; j < comments.length; j++) {
+                //             if (parents[i].id == comments[j].response_to) {
+                //                 comments[j].indent = parents[i].indent + 1;
+                //                 parents.splice(i + 1, 0, comments.splice(j, 1));
+                //                 j--;
+                //                 i++;
+                //             }
+                //         }
+                //     }
+                // }
+                console.log("comments answers", remain);
+                console.log("comments Parent", parents);
+                return parents;
+            },
             loadComments: function () {
+                this.replyId = 0;
+                this.replyName = "";
+                this.comment = "";
+                this.username = "";
                 var self = this;
                 axios
                     .get(`/comments/${this.image}`)
                     .then(function (details) {
-                        // console.log("we received the following comments:", details);
-                        self.comments = details.data;
+                        console.log(
+                            "we received the following comments:",
+                            details.data
+                        );
+                        // self.comments = details.data;
+                        self.comments = self.analyseComments(details.data);
                     })
                     .catch(function (err) {
                         console.log(
@@ -85,24 +155,36 @@
                     comment: this.comment,
                     username: this.username,
                     imageId: this.image,
+                    response_to: this.replyId,
                 };
                 // console.log("writing comment now with:", commentObj);
                 axios
                     .post("/comment", commentObj)
                     .then(function (result) {
-                        commentObj.id = result.data.id;
-                        commentObj.created_at = result.data.created_at;
-                        self.comments.unshift(commentObj);
+                        self.loadComments();
+                        // commentObj.id = result.data.id;
+                        // commentObj.created_at = result.data.created_at;
+                        // self.comments.unshift(commentObj);
                         self.comment = "";
                         self.username = "";
-                        // console.log(formattime(result.data.created_at));
+                        self.replyName = "";
+                        self.replyId = 0;
                     })
-                    .catch(function (err) {});
-                // axios.post("/comment", commentObj).then(function (result) {
-                //     console.log("received obj after wirting comment:", result);
-                // }.catch(function (err) {
-                //     console.log("error in return obj after writing comment:", err);
-                // });
+                    .catch(function (err) {
+                        console.log(
+                            "error in return obj after writing comment:",
+                            err
+                        );
+                    });
+            },
+            parentComment: function (user, id) {
+                if (this.replyId != id) {
+                    this.replyId = id;
+                    this.replyName = user;
+                } else {
+                    this.replyId = 0;
+                    this.replyName = "";
+                }
             },
         },
     });

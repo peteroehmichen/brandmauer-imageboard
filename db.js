@@ -63,10 +63,10 @@ module.exports.getComments = function (imageId) {
         .catch((err) => err);
 };
 
-module.exports.addComment = function (imageId, username, comment) {
+module.exports.addComment = function (imageId, username, comment, response) {
     // console.log("writing comment");
-    const params = [imageId, username, comment];
-    const q = `INSERT INTO comments (image_id, username, comment) VALUES ($1, $2, $3) RETURNING id, created_at;`;
+    const params = [imageId, username, comment, response];
+    const q = `INSERT INTO comments (image_id, username, comment, response_to) VALUES ($1, $2, $3, $4) RETURNING id, created_at;`;
     return sql
         .query(q, params)
         .then((result) => result.rows)
