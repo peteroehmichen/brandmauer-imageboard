@@ -46,64 +46,108 @@
         },
         methods: {
             analyseComments: function (comments) {
-                // console.log("comments START:", comments);
-                var remain = [...comments];
-                var parents = [];
-                var i, j, k;
-                var temp = [];
+                var startArray = comments.slice();
+                var endArray = [];
+                var i, j;
+                var temp;
+                // console.log("start:", startArray);
                 var indent = 0;
-
-                // filtering root elements with empty response_to
-                for (i = 0; i < remain.length; i++) {
-                    if (remain[i].response_to < 1) {
-                        remain[i].indent = indent + "px";
-                        parents.push(remain[i]);
-                        remain.splice(i, 1);
+                // pushing the base elements into the parent, sorted by ID/time
+                for (i = 0; i < startArray.length; i++) {
+                    if (startArray[i].response_to == 0) {
+                        startArray[i].indent = indent;
+                        endArray.push(startArray[i]);
+                        startArray.splice(i, 1);
                         i--;
-                    } 
-                } 
-                console.log("after first run of Array size:", comments.length);
-                console.log("base elements:", parents.length);
-                console.log("sub elements:", remain.length);
-                // compare all parents and find the connected element and include after.
-                while (remain.length > 0) {
-                    indent += 15;
-                    for (i = 0; i < parents.length; i++) {
-                        k = i;
-                        for (j = 0; j < remain.length; j++) {
-                            if (parents[i].id == remain[j].response_to) {
-                                remain[j].indent = indent + "px";
-                                // parents.splice(i + 1, 0, remain[j]);
-                                temp.push(remain[j]);
-                                // parents.splice(k+1, 0, remain[j]);
-                                // k++;
-                                remain.splice(j, 1);
+                    }
+                }
+                while (startArray.length > 0) {
+                    indent += 10;
+
+                    for (i = 0; i < endArray.length; i++) {
+                        // console.log("entering outer loop");
+                        for (j = 0; j < startArray.length; j++) {
+                            // console.log("entering inner loop");
+                            if (
+                                endArray[i].indent == indent - 10 &&
+                                endArray[i].id == startArray[j].response_to
+                            ) {
+                                // console.log(
+                                //     `ID ${startArray[j].id} is a response on level ${indent} to ID ${endArray[i].id}`
+                                // );
+                                startArray[j].indent = indent;
+                                temp = startArray[j];
+                                startArray.splice(j, 1);
                                 j--;
+                                endArray.splice(i + 1, 0, temp);
                             }
                         }
                     }
                 }
-                
-                // now I have all Elements on the current level, only responses left in comments
-                // next step is to find the element place each element after the parent
-                // I take the first parent and look in the remainings for the match on response. if so, then place element after parent
 
-                // while (comments.length > 0) {
-                //     console.log("length:", comments.length);
+                // take base1 and compare all remaing to it -- if response to it then, move right after parent and remove
+
+                // console.log("start:", startArray);
+                // console.log("end:", endArray);
+
+                // console.log("comments START:", comments);
+                // var remain = [...comments];
+                // var parents = [];
+                // var i, j, k;
+                // var temp = [];
+                // var indent = 0;
+
+                // // filtering root elements with empty response_to
+                // for (i = 0; i < remain.length; i++) {
+                //     if (remain[i].response_to < 1) {
+                //         remain[i].indent = indent + "px";
+                //         parents.push(remain[i]);
+                //         remain.splice(i, 1);
+                //         i--;
+                //     }
+                // }
+                // console.log("after first run of Array size:", comments.length);
+                // console.log("base elements:", parents.length);
+                // console.log("sub elements:", remain.length);
+                // // compare all parents and find the connected element and include after.
+                // while (remain.length > 0) {
+                //     indent += 15;
                 //     for (i = 0; i < parents.length; i++) {
-                //         for (j = 0; j < comments.length; j++) {
-                //             if (parents[i].id == comments[j].response_to) {
-                //                 comments[j].indent = parents[i].indent + 1;
-                //                 parents.splice(i + 1, 0, comments.splice(j, 1));
+                //         k = i;
+                //         for (j = 0; j < remain.length; j++) {
+                //             if (parents[i].id == remain[j].response_to) {
+                //                 remain[j].indent = indent + "px";
+                //                 // parents.splice(i + 1, 0, remain[j]);
+                //                 temp.push(remain[j]);
+                //                 // parents.splice(k+1, 0, remain[j]);
+                //                 // k++;
+                //                 remain.splice(j, 1);
                 //                 j--;
-                //                 i++;
                 //             }
                 //         }
                 //     }
                 // }
-                console.log("comments answers", remain);
-                console.log("comments Parent", parents);
-                return parents;
+
+                // // now I have all Elements on the current level, only responses left in comments
+                // // next step is to find the element place each element after the parent
+                // // I take the first parent and look in the remainings for the match on response. if so, then place element after parent
+
+                // // while (comments.length > 0) {
+                // //     console.log("length:", comments.length);
+                // //     for (i = 0; i < parents.length; i++) {
+                // //         for (j = 0; j < comments.length; j++) {
+                // //             if (parents[i].id == comments[j].response_to) {
+                // //                 comments[j].indent = parents[i].indent + 1;
+                // //                 parents.splice(i + 1, 0, comments.splice(j, 1));
+                // //                 j--;
+                // //                 i++;
+                // //             }
+                // //         }
+                // //     }
+                // // }
+                // console.log("comments answers", remain);
+                // console.log("comments Parent", parents);
+                return endArray;
             },
             loadComments: function () {
                 this.replyId = 0;
@@ -114,10 +158,10 @@
                 axios
                     .get(`/comments/${this.image}`)
                     .then(function (details) {
-                        console.log(
-                            "we received the following comments:",
-                            details.data
-                        );
+                        // console.log(
+                        //     "we received the following comments:",
+                        //     details.data
+                        // );
                         // self.comments = details.data;
                         self.comments = self.analyseComments(details.data);
                     })
@@ -322,6 +366,10 @@
                 }
                 this.activateBtn();
             },
+            testFn: function (e) {
+                console.log("test runs...");
+                e.target.style.borderBottom = "3px solid orangered";
+            },
             checkFields: function (e) {
                 if (e.target.value === "") {
                     e.target.style.borderBottom = "3px solid orangered";
@@ -377,6 +425,7 @@
                         // console.log("result from axios.post:", result);
                         // console.log("this inside axios.post:", self);
                         self.images.unshift(result.data);
+                        self.totalImages++;
                     })
                     .catch(function (err) {
                         console.log("ERR in axios.post:", err);
@@ -418,7 +467,7 @@
 /*
 form validation finish! double messages dont work
 Pflichtfelder
-show sum of pictures (maybe with new ones...)
+
 
 show error message in specific cases
 

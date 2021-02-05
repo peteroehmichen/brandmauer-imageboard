@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <path d="M17,12L17,17L3,17L3,12L1,12L1,17C1,18.097 1.903,19 3,19L17,19C18.097,19 19,18.097 19,17L19,12L17,12Z" style="fill-rule:nonzero;"/>
+    <path d="M15,7L10,1L5,7L9,7L9,15L11,15L11,7L15,7Z" style="fill-rule:nonzero;"/>
+    <use xlink:href="#_Image1" x="0" y="0" width="20px" height="20px"/>
+    <defs>
+        <image id="_Image1" width="20px" height="20px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAW0lEQVQ4jWNgGAjwHwqIUctIjGEoGhgZ8erBK4nLVfgMxSlByIu4DMUqSHR4YTGUiRiNVAekxDLVXThSDSQl0LEBZP2D38ssxCgiVCAgA9q6kJKIgYGBycukAACzmzQB0uONDgAAAABJRU5ErkJggg=="/>
+    </defs>
+</svg>

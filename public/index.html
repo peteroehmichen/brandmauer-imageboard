@@ -17,20 +17,26 @@
                         v-model="title"
                         type="text"
                         name="title"
+                        autocomplete="off"
                         placeholder="title"
                         v-on:input="checkFields"
-                    />
-                    <input
+                        v-on:change="checkFields"
+                        
+                        />
+                        <input
                         v-model="description"
                         type="text"
                         name="description"
+                        autocomplete="off"
                         placeholder="description"
                         v-on:input="checkFields"
+                        v-on:change="checkFields"
                     />
                     <input
                         v-model="username"
                         type="text"
                         name="username"
+                        autocomplete="off"
                         placeholder="username"
                         v-on:input="checkFields"
                     />
@@ -43,7 +49,7 @@
                     />
 
                     <label for="file">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/OOjs_UI_icon_upload.svg">
+                        <img src="./upload_white.svg">
                         <span>{{filename}}</span>
                     </label>
 
@@ -91,15 +97,15 @@
                 <div class="imageModal">
                     <div class="modNav">
                         <div class="left">
-                            <p v-if="image.older" class="modNavElements" @click="leftModal">◀</p>
+                            <p v-if="image.older" class="modNavElements" @click.prevent="leftModal">◀</p>
                             <p v-else class="modNavElements">◼︎</p>
                             <!-- <button v-bind:disabled="image.older" @click.prevent="leftModal">older</button> -->
                         </div>
                         <div class="end">
-                            <p class="modNavElements" @click="closeModal">𝗫</p>
+                            <p class="modNavElements" @click.prevent="closeModal">𝗫</p>
                         </div>
                         <div class="right">
-                            <p v-if="image.younger" class="modNavElements" @click="rightModal">▶</p>
+                            <p v-if="image.younger" class="modNavElements" @click.prevent="rightModal">▶</p>
                             <p v-else class="modNavElements">◼︎</p>
                             <!-- <button v-bind:disabled="image.younger" @click.prevent="rightModal">younger</button> -->
                         </div>
@@ -132,13 +138,14 @@
         <script id="comment-template" type="text/x-template">
             <div class="comments">
                 <div class="addComment">
-                    <h4 v-if="replyId">Respond to {{replyName}}</h4>
-                    <h4 v-else>Post new Comment...</h4>
+                    <h4 v-if="replyId">Your response to {{replyName}}</h4>
+                    <h4 v-else>Post a new comment...</h4>
                     <form>
                         <input
                             v-model="comment"
                             type="text"
                             name="comment"
+                            autocomplete="off"
                             placeholder="Your Comment"
                             v-on:input="checkFields"
                         />
@@ -146,6 +153,7 @@
                             v-model="username"
                             type="text"
                             name="username"
+                            autocomplete="off"
                             placeholder="Your username"
                             v-on:input="checkFields"
                         />
@@ -158,12 +166,13 @@
                     </form>
                 </div>
                 <div class="showComments">
-                    <div v-for="each in comments" class="comment" v-bind:style="{ 'margin-left': each.indent }">
+                    <div v-for="each in comments" class="comment" v-bind:style="{ 'margin-left': each.indent+'px' }">
                         <div class="userdata">
                             <p>by {{each.username}} ({{format_time(each.created_at)}})</p>
                         </div>
                         <div class="commentText">
-                            <p>{{each.comment}}</p>
+                            <p v-if="each.indent">→ {{each.comment}}</p>
+                            <p v-else>{{each.comment}}</p>
                         </div>
                         <div class="reply" @click="parentComment(each.username, each.id)" v-bind:id="(each.id === replyId)">↩</div>
                     </div>
