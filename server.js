@@ -4,9 +4,20 @@ const db = require("./db.js");
 const { uploader, uploadToAWS, deleteFromAWS } = require("./upload.js");
 const basicAuth = require("basic-auth");
 
+let logIn;
+let logPass;
+if (process.env.NODE_ENV == "production") {
+    logIn = process.env.authUser; // in prod the secrets are environment variables
+    logPass = process.env.authPass;
+} else {
+    const secrets = require("./secrets"); // in dev they are in secrets.json which is listed in .gitignore
+    logIn = secrets.authUser;
+    logPass = secrets.authPass;
+}
+
 const auth = function (req, res, next) {
     const creds = basicAuth(req);
-    if (!creds || creds.name != "spiced" || creds.pass != "adobo") {
+    if (!creds || creds.name != logIn || creds.pass != logPass) {
         res.setHeader(
             "WWW-Authenticate",
             'Basic realm="Enter your credentials to see this imageboard"'
@@ -61,17 +72,20 @@ app.get("/comments/:imageId", (req, res) => {
 });
 
 app.post("/comment", express.json(), (req, res) => {
-    db.addComment(req.body.imageId, req.body.username, req.body.comment, req.body.response_to).then(
-        (result) => {
-            req.body.id = result[0].id;
-            req.body.created_at = result[0].created_at;
-            res.json(req.body);
-        }
-    );
+    db.addComment(
+        req.body.imageId,
+        req.body.username,
+        req.body.comment,
+        req.body.response_to
+    ).then((result) => {
+        req.body.id = result[0].id;
+        req.body.created_at = result[0].created_at;
+        res.json(req.body);
+    });
 });
 
 app.post("/delete", express.json(), deleteFromAWS, (req, res) => {
-    db.deleteImage(req.body.id).then((result)=>{
+    db.deleteImage(req.body.id).then((result) => {
         res.json(result);
     });
 });
