@@ -8,14 +8,10 @@ module.exports.getImages = function (startId) {
     let param = [];
     let q;
     if (startId == 0) {
-        // q =
-        //     "SELECT *, (SELECT id FROM images ORDER BY id ASC LIMIT 1) AS lowest_id, (SELECT COUNT(id) FROM images) AS total FROM images ORDER BY id DESC LIMIT 6;";
         q =
             "SELECT *, (SELECT id FROM images ORDER BY id ASC LIMIT 1) AS lowest_id, (SELECT COUNT(id) FROM images) AS total, LAG(id, 1) OVER () AS younger, LEAD(id, 1) OVER () AS older FROM images ORDER BY id DESC LIMIT 6;";
         param = [];
     } else {
-        // q =
-        //     "SELECT *, (SELECT id FROM images ORDER BY id ASC LIMIT 1) AS lowest_id, (SELECT COUNT(id) FROM images) AS total FROM images WHERE id < $1 ORDER BY id DESC LIMIT 6;";
         q =
             "SELECT *, (SELECT id FROM images ORDER BY id ASC LIMIT 1) AS lowest_id, (SELECT COUNT(id) FROM images) AS total, LAG(id, 1) OVER () AS younger, LEAD(id, 1) OVER () AS older FROM images WHERE id < $1 ORDER BY id DESC LIMIT 6;";
 
@@ -28,7 +24,7 @@ module.exports.getImages = function (startId) {
             console.log("Error fetching Images:", err);
             return [];
         });
-}; // maybe I want to reduce the number of infos for this requests later...
+}; 
 
 module.exports.addNewImage = function (url, username, title, description) {
     const params = [url, username, title, description];
@@ -47,10 +43,6 @@ module.exports.getImageById = function (id) {
         )
         .then((result) => result)
         .catch((err) => err);
-    // return sql
-    //     .query(`SELECT * FROM images WHERE id=$1;`, [id])
-    //     .then((result) => result)
-    //     .catch((err) => err);
 };
 
 module.exports.getComments = function (imageId) {
@@ -64,7 +56,6 @@ module.exports.getComments = function (imageId) {
 };
 
 module.exports.addComment = function (imageId, username, comment, response) {
-    // console.log("writing comment");
     const params = [imageId, username, comment, response];
     const q = `INSERT INTO comments (image_id, username, comment, response_to) VALUES ($1, $2, $3, $4) RETURNING id, created_at;`;
     return sql
@@ -74,19 +65,12 @@ module.exports.addComment = function (imageId, username, comment, response) {
 };
 
 module.exports.deleteImage = function (imageId) {
-    // console.log("running SQLDB deletion for", imageId);
-    // return;
     return sql
         .query(`DELETE FROM comments WHERE image_id=$1;`, [imageId])
-        .then((result) => {
-            // console.log("Comment deleted: ", result);
+        .then(() => {
             return sql
                 .query(`DELETE FROM images WHERE id=$1;`, [imageId])
                 .then((result) => result);
         })
         .catch((err) => err);
 };
-
-/*
-
-*/

@@ -55,14 +55,11 @@ exports.uploadToAWS = (req, res, next) => {
 
         promise
             .then(() => {
-                // it worked!!!
-                // console.log("AWS Upload successful");
                 fs.unlink(path, () => {});
                 req.body.url = s3Url + req.file.filename;
                 next();
             })
             .catch((err) => {
-                // uh oh
                 console.log(err);
             });
     }
@@ -70,25 +67,16 @@ exports.uploadToAWS = (req, res, next) => {
 
 exports.deleteFromAWS = (req, res, next) => {
     const filename = req.body.url.replace(s3Url, "");
-    // console.log("File:", filename);
     const params = {
         Bucket: "oehmichen-imageboard",
         Key: filename,
     };
     s3.deleteObject(params)
         .promise()
-        .then((result) => {
-            // console.log("deletion confirmation from AWS", result);
+        .then(() => {
             next();
         })
         .catch((err) => {
             console.log(err);
         });
 };
-
-/*
-Final steps to do:
-format delete button
-format comment inputs
-gather grafitti pictures
-*/
