@@ -60,9 +60,11 @@ app.post("/delete", express.json(), deleteFromAWS, (req, res) => {
     });
 });
 
-app.listen(8080, () => {
-    console.log("Imageboard is running...");
-});
+if (require.main == module) {
+    app.listen(process.env.PORT || 8080, () =>
+        console.log("Imageboard is running...")
+    );
+}
 
 /*
 to do: 
