@@ -2,6 +2,22 @@ const express = require("express");
 const app = express();
 const db = require("./db.js");
 const { uploader, uploadToAWS, deleteFromAWS } = require("./upload.js");
+const basicAuth = require("basic-auth");
+
+const auth = function (req, res, next) {
+    const creds = basicAuth(req);
+    if (!creds || creds.name != "spiced" || creds.pass != "adobo") {
+        res.setHeader(
+            "WWW-Authenticate",
+            'Basic realm="Enter your credentials to see this imageboard"'
+        );
+        res.sendStatus(401);
+    } else {
+        next();
+    }
+};
+
+app.use(auth);
 
 app.use(express.static("public"));
 
